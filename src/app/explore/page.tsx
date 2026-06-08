@@ -3,6 +3,7 @@ import { useState } from "react";
 import StockSearch from "@/components/StockSearch";
 import StockChart from "@/components/StockChart";
 import StockAISummary from "@/components/StockAISummary";
+import NewsFeed from "@/components/NewsFeed";
 
 interface Candle {
   date: string;
@@ -40,6 +41,7 @@ export default function ExplorePage() {
             description={selected.description}
             candles={candles}
           />
+          <NewsFeed symbol={selected.symbol} />
         </>
       ) : (
         <div className="rounded-xl border border-dashed border-gray-200 bg-white p-12 text-center">

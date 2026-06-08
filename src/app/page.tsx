@@ -9,6 +9,7 @@ import DayChangeChart from "@/components/DayChangeChart";
 import HoldingsTable from "@/components/HoldingsTable";
 import AddHolding from "@/components/AddHolding";
 import AISummary from "@/components/AISummary";
+import NewsFeed from "@/components/NewsFeed";
 
 export default function Home() {
   const { holdings, addHolding, removeHolding, loaded } = useHoldings();
@@ -60,6 +61,7 @@ export default function Home() {
 
       <HoldingsTable rows={rows} onRemove={removeHolding} />
       <AISummary rows={rows} />
+      {rows.length > 0 && <NewsFeed symbol={rows[0].symbol} />}
     </main>
   );
 }
