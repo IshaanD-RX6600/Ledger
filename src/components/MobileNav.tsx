@@ -24,6 +24,7 @@ export default function MobileNav() {
 
   return (
     <>
+      {/* Hamburger button */}
       <button
         onClick={() => setOpen((o) => !o)}
         className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 focus:outline-none"
@@ -34,22 +35,43 @@ export default function MobileNav() {
         <span className={`h-0.5 w-5 bg-gray-700 transition-all duration-300 origin-center ${open ? "-rotate-45 -translate-y-2" : ""}`} />
       </button>
 
+      {/* Backdrop — rendered via a portal-like top-level fixed div */}
       <div
-        className={`fixed inset-0 z-40 bg-black/30 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+        aria-hidden="true"
         onClick={() => setOpen(false)}
+        style={{ position: "fixed", inset: 0, zIndex: 40, background: "rgba(0,0,0,0.45)", pointerEvents: open ? "auto" : "none", opacity: open ? 1 : 0, transition: "opacity 0.25s" }}
       />
 
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-white shadow-2xl transition-transform duration-300 ease-in-out ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+      {/* Slide-in drawer — flex column so footer naturally stays at bottom */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: "288px",
+          zIndex: 50,
+          transform: open ? "translateX(0)" : "translateX(-100%)",
+          transition: "transform 0.3s ease-in-out",
+        }}
+        className="flex flex-col bg-white shadow-2xl"
+      >
+        {/* Header */}
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-100 px-5 py-4">
           <span className="font-bold text-gray-900">Ledger</span>
-          <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+          <button
+            onClick={() => setOpen(false)}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Close menu"
+          >
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
+        {/* Nav links — flex-1 fills space between header and footer */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -65,7 +87,8 @@ export default function MobileNav() {
           ))}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t border-gray-100 p-4">
+        {/* User info footer */}
+        <div className="flex-shrink-0 border-t border-gray-100 p-4">
           {user ? (
             <div className="flex items-center gap-3">
               {user.photoURL && (

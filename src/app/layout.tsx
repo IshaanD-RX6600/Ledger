@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}>
         <AuthGate>
-          <nav className="sticky top-0 z-40 border-b border-gray-100 bg-white/90 backdrop-blur">
+          <nav className="sticky top-0 z-40 border-b border-gray-100 bg-white">
             <div className="flex items-center gap-6 px-4 sm:px-6 lg:px-8 py-3">
               <span className="font-bold text-gray-900">Ledger</span>
 
