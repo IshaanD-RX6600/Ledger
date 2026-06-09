@@ -12,6 +12,7 @@ export function useTargetAllocation(portfolioId: string) {
 
   const [targets, setTargets] = useState<Record<string, number>>({});
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
@@ -20,16 +21,21 @@ export function useTargetAllocation(portfolioId: string) {
   }, [lsKey]);
 
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<{ data: Record<string, number> }>(uid, fsKey).then((stored) => {
       if (stored) setTargets(stored.data);
+      setFsSynced(true);
     });
   }, [uid, fsKey]);
 
   const persist = useCallback((data: Record<string, number>) => {
     try { localStorage.setItem(lsKey, JSON.stringify(data)); } catch {}
-    if (uid) fsWrite(uid, fsKey, { data });
-  }, [lsKey, fsKey, uid]);
+    if (uid && fsSynced) fsWrite(uid, fsKey, { data });
+  }, [lsKey, fsKey, uid, fsSynced]);
 
   const setTarget = useCallback((symbol: string, pct: number) => {
     setTargets((prev) => {

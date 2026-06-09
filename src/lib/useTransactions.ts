@@ -22,6 +22,7 @@ export function useTransactions(portfolioId: string) {
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
@@ -30,16 +31,21 @@ export function useTransactions(portfolioId: string) {
   }, [lsKey]);
 
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<{ items: Transaction[] }>(uid, fsKey).then((stored) => {
       if (stored) setTransactions(stored.items);
+      setFsSynced(true);
     });
   }, [uid, fsKey]);
 
   const persist = useCallback((txns: Transaction[]) => {
     try { localStorage.setItem(lsKey, JSON.stringify(txns)); } catch {}
-    if (uid) fsWrite(uid, fsKey, { items: txns });
-  }, [lsKey, fsKey, uid]);
+    if (uid && fsSynced) fsWrite(uid, fsKey, { items: txns });
+  }, [lsKey, fsKey, uid, fsSynced]);
 
   const addTransaction = useCallback((t: Omit<Transaction, "id">) => {
     setTransactions((prev) => {

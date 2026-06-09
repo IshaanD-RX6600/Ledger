@@ -17,6 +17,7 @@ export function usePortfolioHistory(portfolioId: string) {
 
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
@@ -25,9 +26,14 @@ export function usePortfolioHistory(portfolioId: string) {
   }, [lsKey]);
 
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<{ snapshots: HistorySnapshot[] }>(uid, fsKey).then((stored) => {
       if (stored) setHistory(stored.snapshots);
+      setFsSynced(true);
     });
   }, [uid, fsKey]);
 
@@ -41,10 +47,10 @@ export function usePortfolioHistory(portfolioId: string) {
       else updated.push({ date: today, value });
       const trimmed = updated.slice(-90);
       try { localStorage.setItem(lsKey, JSON.stringify(trimmed)); } catch {}
-      if (uid) fsWrite(uid, fsKey, { snapshots: trimmed });
+      if (uid && fsSynced) fsWrite(uid, fsKey, { snapshots: trimmed });
       return trimmed;
     });
-  }, [lsKey, fsKey, uid]);
+  }, [lsKey, fsKey, uid, fsSynced]);
 
   return { history, saveSnapshot };
 }

@@ -40,29 +40,36 @@ export function usePortfolios() {
   });
   const [loaded, setLoaded] = useState(false);
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  // Gate that prevents writing to Firestore before we've read from it first.
+  // Without this, an empty localStorage on a new browser would overwrite Firestore data.
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
-  // Load from localStorage on mount
   useEffect(() => {
     setState(loadLocal());
     setLoaded(true);
   }, []);
 
-  // When uid resolves, pull from Firestore (overwrites localStorage data if found)
+  // Read from Firestore when uid resolves. Block writes until this completes.
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<State>(uid, FS_KEY).then((stored) => {
       if (stored) setState(stored);
+      setFsSynced(true);
     });
   }, [uid]);
 
-  // Persist to localStorage + Firestore on every change
+  // Write only after both local load and Firestore read are complete
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !fsSynced) return;
     localStorage.setItem(LS_KEY, JSON.stringify(state));
     if (uid) fsWrite(uid, FS_KEY, state);
-  }, [state, loaded, uid]);
+  }, [state, loaded, uid, fsSynced]);
 
   const active = state.portfolios.find((p) => p.id === state.activeId) ?? state.portfolios[0];
 

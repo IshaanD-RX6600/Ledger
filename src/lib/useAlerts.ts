@@ -17,6 +17,7 @@ export function useAlerts() {
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
@@ -26,17 +27,22 @@ export function useAlerts() {
   }, []);
 
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<{ items: PriceAlert[] }>(uid, FS_KEY).then((stored) => {
       if (stored) setAlerts(stored.items);
+      setFsSynced(true);
     });
   }, [uid]);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !fsSynced) return;
     localStorage.setItem(LS_KEY, JSON.stringify(alerts));
     if (uid) fsWrite(uid, FS_KEY, { items: alerts });
-  }, [alerts, loaded, uid]);
+  }, [alerts, loaded, uid, fsSynced]);
 
   const setAlert = useCallback((symbol: string, targetPrice: number, direction: "above" | "below") => {
     setAlerts((prev) => {

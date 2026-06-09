@@ -11,6 +11,7 @@ export function useWatchlist() {
   const [symbols, setSymbols] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+  const [fsSynced, setFsSynced] = useState(false);
 
   useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
@@ -20,17 +21,22 @@ export function useWatchlist() {
   }, []);
 
   useEffect(() => {
-    if (!uid) return;
+    setFsSynced(false);
+    if (!uid) {
+      setFsSynced(true);
+      return;
+    }
     fsRead<{ symbols: string[] }>(uid, FS_KEY).then((stored) => {
       if (stored) setSymbols(stored.symbols);
+      setFsSynced(true);
     });
   }, [uid]);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !fsSynced) return;
     localStorage.setItem(LS_KEY, JSON.stringify(symbols));
     if (uid) fsWrite(uid, FS_KEY, { symbols });
-  }, [symbols, loaded, uid]);
+  }, [symbols, loaded, uid, fsSynced]);
 
   const add = useCallback((symbol: string) => {
     setSymbols((prev) => prev.includes(symbol) ? prev : [...prev, symbol]);
