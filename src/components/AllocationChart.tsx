@@ -12,8 +12,8 @@ export default function AllocationChart({ rows }: { rows: EnrichedHolding[] }) {
   if (!data.length) return <p className="text-gray-400">No data yet.</p>;
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800">
-      <h2 className="mb-3 font-semibold dark:text-white">Allocation</h2>
+    <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
+      <h2 className="mb-3 font-semibold text-gray-900">Allocation</h2>
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie data={data} dataKey="value" nameKey="name" outerRadius={100} label>

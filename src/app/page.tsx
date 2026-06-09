@@ -6,8 +6,9 @@ import { useAlerts } from "@/lib/useAlerts";
 import { useTransactions } from "@/lib/useTransactions";
 import { useTargetAllocation } from "@/lib/useTargetAllocation";
 import { useNotes } from "@/lib/useNotes";
+import { useSettings } from "@/lib/useSettings";
 import { enrich } from "@/lib/enrich";
-import { Quote, EnrichedHolding } from "@/types";
+import { Quote, EnrichedHolding, Holding } from "@/types";
 import SummaryCards from "@/components/SummaryCards";
 import AllocationChart from "@/components/AllocationChart";
 import DayChangeChart from "@/components/DayChangeChart";
@@ -20,7 +21,6 @@ import PortfolioSwitcher from "@/components/PortfolioSwitcher";
 import PortfolioHistoryChart from "@/components/PortfolioHistoryChart";
 import TransactionLog from "@/components/TransactionLog";
 import EarningsCalendar from "@/components/EarningsCalendar";
-import { Holding } from "@/types";
 
 export default function Home() {
   const {
@@ -33,6 +33,7 @@ export default function Home() {
   const { transactions, addTransaction, removeTransaction } = useTransactions(activeId);
   const { targets, setTarget, removeTarget } = useTargetAllocation(activeId);
   const { notes, setNote } = useNotes();
+  const { settings } = useSettings();
 
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [rows, setRows] = useState<EnrichedHolding[]>([]);
@@ -55,9 +56,9 @@ export default function Home() {
   useEffect(() => {
     if (!loaded) return;
     fetchQuotes();
-    const id = setInterval(fetchQuotes, 30000);
+    const id = setInterval(fetchQuotes, settings.refreshInterval);
     return () => clearInterval(id);
-  }, [fetchQuotes, loaded]);
+  }, [fetchQuotes, loaded, settings.refreshInterval]);
 
   useEffect(() => {
     setRows(enrich(holdings, quotes));
@@ -97,10 +98,10 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 p-6">
+    <main className="space-y-6 px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold dark:text-white">Portfolio</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Portfolio</h1>
           <PortfolioSwitcher
             portfolios={portfolios}
             activeId={activeId}
@@ -111,7 +112,7 @@ export default function Home() {
         </div>
         <button
           onClick={fetchQuotes}
-          className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline"
+          className="text-sm text-indigo-600 hover:underline"
         >
           {refreshing ? "Refreshing…" : "Refresh"}
         </button>
@@ -141,6 +142,7 @@ export default function Home() {
         notes={notes}
         onSetNote={setNote}
         onSell={handleSell}
+        visibleColumns={settings.visibleColumns}
       />
 
       <TransactionLog transactions={transactions} onRemove={removeTransaction} />
@@ -156,7 +158,7 @@ export default function Home() {
                 className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
                   activeNewsSymbol === r.symbol
                     ? "bg-indigo-600 text-white"
-                    : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-400"
+                    : "bg-white border border-gray-200 text-gray-600 hover:border-indigo-400"
                 }`}
               >
                 {r.symbol}

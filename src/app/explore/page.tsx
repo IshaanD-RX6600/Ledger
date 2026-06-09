@@ -29,8 +29,8 @@ export default function ExplorePage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 p-6">
-      <h1 className="text-2xl font-bold dark:text-white">Explore</h1>
+    <main className="space-y-6 px-4 sm:px-6 lg:px-8 py-6">
+      <h1 className="text-2xl font-bold text-gray-900">Explore</h1>
 
       <StockSearch onSelect={handleSelect} />
 
@@ -43,8 +43,8 @@ export default function ExplorePage() {
               }
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium border transition-colors ${
                 isWatched(selected.symbol)
-                  ? "bg-indigo-50 dark:bg-indigo-950 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400"
-                  : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-indigo-400"
+                  ? "bg-indigo-50 border-indigo-200 text-indigo-600"
+                  : "bg-white border-gray-200 text-gray-600 hover:border-indigo-400"
               }`}
             >
               <svg
@@ -72,7 +72,7 @@ export default function ExplorePage() {
           <NewsFeed symbol={selected.symbol} />
         </>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-12 text-center">
+        <div className="rounded-xl border border-dashed border-gray-200 bg-white p-12 text-center">
           <p className="text-gray-400 text-sm">Search for a stock symbol to see its chart and AI summary.</p>
         </div>
       )}

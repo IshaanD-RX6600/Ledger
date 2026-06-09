@@ -7,14 +7,17 @@ interface SearchResult {
   description: string;
 }
 
+const inputCls =
+  "rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 placeholder:text-gray-400";
+
 export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
   const [symbol, setSymbol] = useState("");
   const [shares, setShares] = useState("");
   const [cost, setCost] = useState("");
-
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [searching, setSearching] = useState(false);
+
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const symbolRef = useRef<HTMLInputElement>(null);
@@ -70,24 +73,21 @@ export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
     setOpen(false);
   }
 
-  const submit = () => {
+  function submit() {
     const s = symbol.trim().toUpperCase();
     const sh = parseFloat(shares);
     const cb = parseFloat(cost);
     if (!s || isNaN(sh) || isNaN(cb) || sh <= 0) return;
     onAdd({ symbol: s, shares: sh, costBasis: cb });
     setSymbol(""); setShares(""); setCost("");
-  };
-
-  const input =
-    "rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm dark:text-gray-100 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900 placeholder:text-gray-400 dark:placeholder:text-gray-500";
+  }
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+    <div className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-4 shadow-sm border border-gray-100">
       <div ref={containerRef} className="relative">
         <input
           ref={symbolRef}
-          className={input}
+          className={inputCls}
           placeholder="Symbol (AAPL)"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value.toUpperCase())}
@@ -99,14 +99,14 @@ export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">…</span>
         )}
         {open && results.length > 0 && (
-          <ul className="absolute z-50 mt-1 w-56 rounded-xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg overflow-hidden">
+          <ul className="absolute z-50 mt-1 w-56 rounded-xl border border-gray-100 bg-white shadow-lg overflow-hidden">
             {results.map((r) => (
               <li
                 key={r.symbol}
                 onMouseDown={() => handleSelect(r)}
-                className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors"
+                className="flex items-center justify-between px-4 py-2.5 cursor-pointer hover:bg-indigo-50 transition-colors"
               >
-                <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">{r.symbol}</span>
+                <span className="font-semibold text-sm text-gray-900">{r.symbol}</span>
                 <span className="text-xs text-gray-400 truncate ml-3 max-w-[120px] text-right">
                   {r.description}
                 </span>
@@ -117,14 +117,14 @@ export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
       </div>
 
       <input
-        className={input}
+        className={inputCls}
         placeholder="Shares"
         type="number"
         value={shares}
         onChange={(e) => setShares(e.target.value)}
       />
       <input
-        className={input}
+        className={inputCls}
         placeholder="Avg cost"
         type="number"
         value={cost}

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { timeAgo } from "@/lib/format";
 
 interface Article {
   headline: string;
@@ -8,13 +9,6 @@ interface Article {
   image: string | null;
   datetime: number;
   summary: string;
-}
-
-function timeAgo(unix: number) {
-  const diff = Math.floor((Date.now() / 1000) - unix);
-  if (diff < 3600) return `${Math.max(1, Math.floor(diff / 60))}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return `${Math.floor(diff / 86400)}d ago`;
 }
 
 function ArticleModal({ article, onClose }: { article: Article; onClose: () => void }) {
@@ -32,7 +26,7 @@ function ArticleModal({ article, onClose }: { article: Article; onClose: () => v
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
+        className="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {article.image && (
@@ -47,18 +41,18 @@ function ArticleModal({ article, onClose }: { article: Article; onClose: () => v
           <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
             {article.source} · {timeAgo(article.datetime)}
           </p>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white leading-snug">
+          <h2 className="text-lg font-semibold text-gray-900 leading-snug">
             {article.headline}
           </h2>
           {article.summary && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-6">
+            <p className="text-sm text-gray-600 leading-relaxed line-clamp-6">
               {article.summary}
             </p>
           )}
           <div className="flex items-center justify-between pt-2">
             <button
               onClick={onClose}
-              className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+              className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
             >
               Close
             </button>
@@ -114,8 +108,8 @@ export default function NewsFeed({ symbol }: { symbol: string }) {
     <>
       {selected && <ArticleModal article={selected} onClose={() => setSelected(null)} />}
 
-      <div className="rounded-xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800 space-y-3">
-        <h2 className="font-semibold dark:text-white">
+      <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 space-y-3">
+        <h2 className="font-semibold text-gray-900">
           Latest News
           <span className="ml-2 text-sm font-normal text-gray-400">· {symbol}</span>
         </h2>
@@ -124,10 +118,10 @@ export default function NewsFeed({ symbol }: { symbol: string }) {
           <div className="space-y-3">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex gap-3 animate-pulse">
-                <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-gray-800 shrink-0" />
+                <div className="h-10 w-10 rounded-lg bg-gray-100 shrink-0" />
                 <div className="flex-1 space-y-2 py-1">
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/3" />
+                  <div className="h-3 bg-gray-100 rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 rounded w-1/3" />
                 </div>
               </div>
             ))}
@@ -135,7 +129,7 @@ export default function NewsFeed({ symbol }: { symbol: string }) {
         )}
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950 rounded-lg px-3 py-2">{error}</p>
+          <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
         )}
 
         {!loading && !error && articles.length === 0 && (
@@ -143,7 +137,7 @@ export default function NewsFeed({ symbol }: { symbol: string }) {
         )}
 
         {!loading && articles.length > 0 && (
-          <ul className="divide-y divide-gray-50 dark:divide-gray-800">
+          <ul className="divide-y divide-gray-50">
             {articles.map((a, i) => (
               <li key={i} className="py-3 first:pt-0 last:pb-0">
                 <button
@@ -154,12 +148,12 @@ export default function NewsFeed({ symbol }: { symbol: string }) {
                     <img
                       src={a.image}
                       alt=""
-                      className="h-12 w-12 rounded-lg object-cover shrink-0 bg-gray-100 dark:bg-gray-800"
+                      className="h-12 w-12 rounded-lg object-cover shrink-0 bg-gray-100"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                     />
                   )}
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2 leading-snug">
+                    <p className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
                       {a.headline}
                     </p>
                     <p className="mt-1 text-xs text-gray-400">

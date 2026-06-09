@@ -36,12 +36,12 @@ export default function EarningsCalendar({ symbols }: { symbols: string[] }) {
   if (!symbols.length || (!loading && !earnings.length)) return null;
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800">
-      <h2 className="mb-4 font-semibold dark:text-white">Upcoming Earnings</h2>
+    <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
+      <h2 className="mb-4 font-semibold text-gray-900">Upcoming Earnings</h2>
       {loading ? (
         <div className="flex gap-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-36 h-24 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            <div key={i} className="flex-shrink-0 w-36 h-24 rounded-xl bg-gray-100 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -54,19 +54,13 @@ export default function EarningsCalendar({ symbols }: { symbols: string[] }) {
                 key={i}
                 className={`flex-shrink-0 rounded-xl border p-3 w-36 ${
                   urgent
-                    ? "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950"
-                    : "border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+                    ? "border-amber-200 bg-amber-50"
+                    : "border-gray-100 bg-gray-50"
                 }`}
               >
-                <p className="font-bold text-sm dark:text-white">{e.symbol}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  Q{e.quarter} {e.year}
-                </p>
-                <p
-                  className={`text-xs font-medium mt-2 ${
-                    urgent ? "text-amber-700 dark:text-amber-400" : "text-gray-500 dark:text-gray-400"
-                  }`}
-                >
+                <p className="font-bold text-sm text-gray-900">{e.symbol}</p>
+                <p className="text-xs text-gray-500 mt-0.5">Q{e.quarter} {e.year}</p>
+                <p className={`text-xs font-medium mt-2 ${urgent ? "text-amber-700" : "text-gray-500"}`}>
                   {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days}d`}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">

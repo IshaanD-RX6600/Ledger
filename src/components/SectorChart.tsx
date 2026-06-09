@@ -35,12 +35,11 @@ export default function SectorChart({ rows }: { rows: EnrichedHolding[] }) {
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
-  // Don't render if we only have "Unknown" (profiles not yet loaded)
   if (data.length === 0 || (data.length === 1 && data[0].name === "Unknown")) return null;
 
   return (
-    <div className="rounded-xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800">
-      <h2 className="mb-3 font-semibold dark:text-white">Sector Breakdown</h2>
+    <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
+      <h2 className="mb-3 font-semibold text-gray-900">Sector Breakdown</h2>
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie data={data} dataKey="value" nameKey="name" outerRadius={100} label>

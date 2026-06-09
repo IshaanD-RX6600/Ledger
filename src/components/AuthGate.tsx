@@ -6,7 +6,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="h-8 w-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
       </div>
     );
@@ -14,22 +14,22 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 p-6">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
         <div className="w-full max-w-sm space-y-8 text-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ledger</h1>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Your personal portfolio dashboard</p>
+            <h1 className="text-3xl font-bold text-gray-900">Ledger</h1>
+            <p className="mt-2 text-sm text-gray-500">Your personal portfolio dashboard</p>
           </div>
 
-          <div className="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm p-8 space-y-6">
+          <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-8 space-y-6">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold dark:text-white">Sign in to continue</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Sign in to continue</h2>
               <p className="text-sm text-gray-400">Your portfolio is tied to your account</p>
             </div>
 
             <button
               onClick={signIn}
-              className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+              className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
             >
               <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
