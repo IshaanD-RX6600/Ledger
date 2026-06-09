@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useDark } from "@/lib/useDark";
 
 interface Candle {
   date: string;
@@ -31,6 +32,7 @@ function fmt(n: number) {
 }
 
 export default function StockChart({ symbol, description }: Props) {
+  const dark = useDark();
   const [range, setRange] = useState<Range>("3M");
   const [candles, setCandles] = useState<Candle[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,15 +67,25 @@ export default function StockChart({ symbol, description }: Props) {
     return i % step === 0;
   });
 
+  const tickColor = dark ? "#9ca3af" : "#9ca3af";
+  const gridColor = dark ? "#374151" : "#f0f0f0";
+  const tooltipStyle = {
+    fontSize: 12,
+    borderRadius: 8,
+    border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
+    backgroundColor: dark ? "#1f2937" : "#ffffff",
+    color: dark ? "#f9fafb" : "#111827",
+  };
+
   return (
-    <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100 space-y-4">
+    <div className="rounded-xl bg-white dark:bg-gray-900 p-5 shadow-sm border border-gray-100 dark:border-gray-800 space-y-4">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">{symbol}</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{symbol}</h2>
           <p className="text-sm text-gray-400">{description}</p>
           {candles.length > 0 && (
             <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl font-semibold">{fmt(last)}</span>
+              <span className="text-2xl font-semibold dark:text-white">{fmt(last)}</span>
               <span className={`text-sm font-medium ${isUp ? "text-green-600" : "text-red-600"}`}>
                 {isUp ? "+" : ""}{fmt(gain)} ({isUp ? "+" : ""}{gainPct.toFixed(2)}%)
               </span>
@@ -88,7 +100,7 @@ export default function StockChart({ symbol, description }: Props) {
               className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                 range === r
                   ? "bg-indigo-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
               }`}
             >
               {r}
@@ -104,7 +116,7 @@ export default function StockChart({ symbol, description }: Props) {
       )}
 
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+        <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950 rounded-lg px-3 py-2">{error}</p>
       )}
 
       {!loading && !error && candles.length > 0 && (
@@ -117,11 +129,11 @@ export default function StockChart({ symbol, description }: Props) {
                   <stop offset="95%" stopColor={color} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
               <XAxis
                 dataKey="date"
                 ticks={tickedDates.map((c) => c.date)}
-                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tick={{ fontSize: 11, fill: tickColor }}
                 tickFormatter={(d) => {
                   const dt = new Date(d);
                   return dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -131,7 +143,7 @@ export default function StockChart({ symbol, description }: Props) {
               />
               <YAxis
                 domain={["auto", "auto"]}
-                tick={{ fontSize: 11, fill: "#9ca3af" }}
+                tick={{ fontSize: 11, fill: tickColor }}
                 tickFormatter={(v) => `$${v.toFixed(0)}`}
                 axisLine={false}
                 tickLine={false}
@@ -139,8 +151,10 @@ export default function StockChart({ symbol, description }: Props) {
               />
               <Tooltip
                 formatter={(v: number) => [fmt(v), "Close"]}
-                labelFormatter={(l) => new Date(l).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #e5e7eb" }}
+                labelFormatter={(l) =>
+                  new Date(l).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                }
+                contentStyle={tooltipStyle}
               />
               <Area
                 type="monotone"
@@ -154,7 +168,7 @@ export default function StockChart({ symbol, description }: Props) {
             </AreaChart>
           </ResponsiveContainer>
 
-          <div className="flex gap-6 border-t border-gray-100 pt-3">
+          <div className="flex gap-6 border-t border-gray-100 dark:border-gray-800 pt-3">
             <div>
               <p className="text-xs text-gray-400">Period High</p>
               <p className="text-sm font-semibold text-green-600">{fmt(periodHigh)}</p>
@@ -165,7 +179,7 @@ export default function StockChart({ symbol, description }: Props) {
             </div>
             <div>
               <p className="text-xs text-gray-400">Data points</p>
-              <p className="text-sm font-semibold text-gray-700">{candles.length} days</p>
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">{candles.length} days</p>
             </div>
           </div>
         </>
