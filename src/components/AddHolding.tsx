@@ -17,6 +17,23 @@ export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
   const [searching, setSearching] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const symbolRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (
+        e.key === "/" &&
+        !(e.target instanceof HTMLInputElement) &&
+        !(e.target instanceof HTMLTextAreaElement) &&
+        !(e.target instanceof HTMLSelectElement)
+      ) {
+        e.preventDefault();
+        symbolRef.current?.focus();
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) { setResults([]); setOpen(false); return; }
@@ -69,12 +86,14 @@ export default function AddHolding({ onAdd }: { onAdd: (h: Holding) => void }) {
     <div className="flex flex-wrap items-end gap-3 rounded-xl bg-white dark:bg-gray-900 p-4 shadow-sm border border-gray-100 dark:border-gray-800">
       <div ref={containerRef} className="relative">
         <input
+          ref={symbolRef}
           className={input}
           placeholder="Symbol (AAPL)"
           value={symbol}
           onChange={(e) => setSymbol(e.target.value.toUpperCase())}
           onFocus={() => results.length && setOpen(true)}
           autoComplete="off"
+          title="Press / to focus"
         />
         {searching && (
           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">…</span>

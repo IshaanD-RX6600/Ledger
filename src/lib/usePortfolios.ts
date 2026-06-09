@@ -92,6 +92,22 @@ export function usePortfolios() {
     });
   }, []);
 
+  const sellHolding = useCallback((symbol: string, shares: number) => {
+    setState((prev) => ({
+      ...prev,
+      portfolios: prev.portfolios.map((p) => {
+        if (p.id !== prev.activeId) return p;
+        const h = p.holdings.find((x) => x.symbol === symbol);
+        if (!h) return p;
+        const remaining = h.shares - shares;
+        if (remaining <= 0.0001) {
+          return { ...p, holdings: p.holdings.filter((x) => x.symbol !== symbol) };
+        }
+        return { ...p, holdings: p.holdings.map((x) => x.symbol === symbol ? { ...x, shares: remaining } : x) };
+      }),
+    }));
+  }, []);
+
   return {
     portfolios: state.portfolios,
     activeId: state.activeId,
@@ -99,6 +115,7 @@ export function usePortfolios() {
     holdings: active?.holdings ?? [],
     addHolding,
     removeHolding,
+    sellHolding,
     createPortfolio,
     switchPortfolio,
     deletePortfolio,

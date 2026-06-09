@@ -3,25 +3,37 @@ import { useEffect, useState, useCallback } from "react";
 import { usePortfolios } from "@/lib/usePortfolios";
 import { usePortfolioHistory } from "@/lib/usePortfolioHistory";
 import { useAlerts } from "@/lib/useAlerts";
+import { useTransactions } from "@/lib/useTransactions";
+import { useTargetAllocation } from "@/lib/useTargetAllocation";
+import { useNotes } from "@/lib/useNotes";
 import { enrich } from "@/lib/enrich";
 import { Quote, EnrichedHolding } from "@/types";
 import SummaryCards from "@/components/SummaryCards";
 import AllocationChart from "@/components/AllocationChart";
 import DayChangeChart from "@/components/DayChangeChart";
+import SectorChart from "@/components/SectorChart";
 import HoldingsTable from "@/components/HoldingsTable";
 import AddHolding from "@/components/AddHolding";
 import AISummary from "@/components/AISummary";
 import NewsFeed from "@/components/NewsFeed";
 import PortfolioSwitcher from "@/components/PortfolioSwitcher";
 import PortfolioHistoryChart from "@/components/PortfolioHistoryChart";
+import TransactionLog from "@/components/TransactionLog";
+import EarningsCalendar from "@/components/EarningsCalendar";
+import { Holding } from "@/types";
 
 export default function Home() {
   const {
     portfolios, activeId, holdings,
-    addHolding, removeHolding, createPortfolio, switchPortfolio, deletePortfolio, loaded,
+    addHolding, removeHolding, sellHolding,
+    createPortfolio, switchPortfolio, deletePortfolio, loaded,
   } = usePortfolios();
   const { history, saveSnapshot } = usePortfolioHistory(activeId);
   const { alerts, setAlert, removeAlert } = useAlerts();
+  const { transactions, addTransaction, removeTransaction } = useTransactions(activeId);
+  const { targets, setTarget, removeTarget } = useTargetAllocation(activeId);
+  const { notes, setNote } = useNotes();
+
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [rows, setRows] = useState<EnrichedHolding[]>([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,9 +68,33 @@ export default function Home() {
     if (total > 0) saveSnapshot(total);
   }, [rows, saveSnapshot]);
 
-  // Keep newsSymbol in sync: default to first holding, clear when no holdings
   const activeNewsSymbol =
     rows.find((r) => r.symbol === newsSymbol)?.symbol ?? rows[0]?.symbol ?? null;
+
+  function handleAddHolding(h: Holding) {
+    addHolding(h);
+    addTransaction({
+      symbol: h.symbol,
+      type: "buy",
+      shares: h.shares,
+      price: h.costBasis,
+      date: new Date().toISOString().slice(0, 10),
+    });
+  }
+
+  function handleSell(symbol: string, shares: number, price: number) {
+    const row = rows.find((r) => r.symbol === symbol);
+    const realizedGain = row ? (price - row.costBasis) * Math.min(shares, row.shares) : 0;
+    sellHolding(symbol, shares);
+    addTransaction({
+      symbol,
+      type: "sell",
+      shares,
+      price,
+      date: new Date().toISOString().slice(0, 10),
+      realizedGain,
+    });
+  }
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 p-6">
@@ -81,7 +117,7 @@ export default function Home() {
         </button>
       </div>
 
-      <AddHolding onAdd={addHolding} />
+      <AddHolding onAdd={handleAddHolding} />
       <SummaryCards rows={rows} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -89,7 +125,9 @@ export default function Home() {
         <DayChangeChart rows={rows} />
       </div>
 
+      <SectorChart rows={rows} />
       <PortfolioHistoryChart history={history} />
+      <EarningsCalendar symbols={rows.map((r) => r.symbol)} />
 
       <HoldingsTable
         rows={rows}
@@ -97,8 +135,15 @@ export default function Home() {
         alerts={alerts}
         onSetAlert={setAlert}
         onRemoveAlert={removeAlert}
+        targets={targets}
+        onSetTarget={setTarget}
+        onRemoveTarget={removeTarget}
+        notes={notes}
+        onSetNote={setNote}
+        onSell={handleSell}
       />
 
+      <TransactionLog transactions={transactions} onRemove={removeTransaction} />
       <AISummary rows={rows} />
 
       {rows.length > 0 && (
