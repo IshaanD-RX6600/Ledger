@@ -1,5 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+import { fsRead, fsWrite } from "./firestoreSync";
 import { Holding } from "@/types";
 
 interface Portfolio {
@@ -13,19 +16,17 @@ interface State {
   activeId: string;
 }
 
-const KEY = "ledger.portfolios.v1";
+const LS_KEY = "ledger.portfolios.v1";
 const OLD_KEY = "portfolio.holdings.v1";
 const DEFAULT_ID = "default";
+const FS_KEY = "portfolios";
 
-function loadInitial(): State {
+function loadLocal(): State {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(LS_KEY);
     if (raw) return JSON.parse(raw);
     let holdings: Holding[] = [];
-    try {
-      const old = localStorage.getItem(OLD_KEY);
-      if (old) holdings = JSON.parse(old);
-    } catch {}
+    try { const old = localStorage.getItem(OLD_KEY); if (old) holdings = JSON.parse(old); } catch {}
     return { portfolios: [{ id: DEFAULT_ID, name: "My Portfolio", holdings }], activeId: DEFAULT_ID };
   } catch {
     return { portfolios: [{ id: DEFAULT_ID, name: "My Portfolio", holdings: [] }], activeId: DEFAULT_ID };
@@ -38,15 +39,30 @@ export function usePortfolios() {
     activeId: DEFAULT_ID,
   });
   const [loaded, setLoaded] = useState(false);
+  const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
 
+  useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
+
+  // Load from localStorage on mount
   useEffect(() => {
-    setState(loadInitial());
+    setState(loadLocal());
     setLoaded(true);
   }, []);
 
+  // When uid resolves, pull from Firestore (overwrites localStorage data if found)
   useEffect(() => {
-    if (loaded) localStorage.setItem(KEY, JSON.stringify(state));
-  }, [state, loaded]);
+    if (!uid) return;
+    fsRead<State>(uid, FS_KEY).then((stored) => {
+      if (stored) setState(stored);
+    });
+  }, [uid]);
+
+  // Persist to localStorage + Firestore on every change
+  useEffect(() => {
+    if (!loaded) return;
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    if (uid) fsWrite(uid, FS_KEY, state);
+  }, [state, loaded, uid]);
 
   const active = state.portfolios.find((p) => p.id === state.activeId) ?? state.portfolios[0];
 
@@ -100,9 +116,7 @@ export function usePortfolios() {
         const h = p.holdings.find((x) => x.symbol === symbol);
         if (!h) return p;
         const remaining = h.shares - shares;
-        if (remaining <= 0.0001) {
-          return { ...p, holdings: p.holdings.filter((x) => x.symbol !== symbol) };
-        }
+        if (remaining <= 0.0001) return { ...p, holdings: p.holdings.filter((x) => x.symbol !== symbol) };
         return { ...p, holdings: p.holdings.map((x) => x.symbol === symbol ? { ...x, shares: remaining } : x) };
       }),
     }));
@@ -113,12 +127,8 @@ export function usePortfolios() {
     activeId: state.activeId,
     activePortfolio: active,
     holdings: active?.holdings ?? [],
-    addHolding,
-    removeHolding,
-    sellHolding,
-    createPortfolio,
-    switchPortfolio,
-    deletePortfolio,
+    addHolding, removeHolding, sellHolding,
+    createPortfolio, switchPortfolio, deletePortfolio,
     loaded,
   };
 }

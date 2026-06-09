@@ -1,5 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./firebase";
+import { fsRead, fsWrite } from "./firestoreSync";
 
 export interface PriceAlert {
   symbol: string;
@@ -7,23 +10,33 @@ export interface PriceAlert {
   direction: "above" | "below";
 }
 
-const KEY = "ledger.alerts.v1";
+const LS_KEY = "ledger.alerts.v1";
+const FS_KEY = "alerts";
 
 export function useAlerts() {
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [uid, setUid] = useState<string | null>(() => auth.currentUser?.uid ?? null);
+
+  useEffect(() => onAuthStateChanged(auth, (u) => setUid(u?.uid ?? null)), []);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) setAlerts(JSON.parse(raw));
-    } catch {}
+    try { const raw = localStorage.getItem(LS_KEY); if (raw) setAlerts(JSON.parse(raw)); } catch {}
     setLoaded(true);
   }, []);
 
   useEffect(() => {
-    if (loaded) localStorage.setItem(KEY, JSON.stringify(alerts));
-  }, [alerts, loaded]);
+    if (!uid) return;
+    fsRead<{ items: PriceAlert[] }>(uid, FS_KEY).then((stored) => {
+      if (stored) setAlerts(stored.items);
+    });
+  }, [uid]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    localStorage.setItem(LS_KEY, JSON.stringify(alerts));
+    if (uid) fsWrite(uid, FS_KEY, { items: alerts });
+  }, [alerts, loaded, uid]);
 
   const setAlert = useCallback((symbol: string, targetPrice: number, direction: "above" | "below") => {
     setAlerts((prev) => {
