@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import AuthButton from "@/components/AuthButton";
+import AuthGate from "@/components/AuthGate";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,25 +39,28 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-gray-950`}
       >
-        <nav className="sticky top-0 z-40 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
-            <span className="font-bold text-gray-900 dark:text-white">Ledger</span>
-            <Link
-              href="/"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Portfolio
-            </Link>
-            <Link
-              href="/explore"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Explore
-            </Link>
-            <ThemeToggle />
-          </div>
-        </nav>
-        {children}
+        <AuthGate>
+          <nav className="sticky top-0 z-40 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur">
+            <div className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
+              <span className="font-bold text-gray-900 dark:text-white">Ledger</span>
+              <Link
+                href="/"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              >
+                Portfolio
+              </Link>
+              <Link
+                href="/explore"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              >
+                Explore
+              </Link>
+              <AuthButton />
+              <ThemeToggle />
+            </div>
+          </nav>
+          {children}
+        </AuthGate>
       </body>
     </html>
   );
