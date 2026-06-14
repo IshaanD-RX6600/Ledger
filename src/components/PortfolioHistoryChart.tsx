@@ -69,8 +69,8 @@ export default function PortfolioHistoryChart({ history }: { history: HistorySna
 
   return (
     <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-baseline gap-3">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <h2 className="font-semibold text-gray-900">Portfolio History</h2>
           <span className={`text-sm font-medium ${gain >= 0 ? "text-green-600" : "text-red-600"}`}>
             {gain >= 0 ? "+" : ""}{fmtRound(gain)} ({gainPct >= 0 ? "+" : ""}{gainPct.toFixed(2)}%)

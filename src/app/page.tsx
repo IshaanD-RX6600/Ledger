@@ -101,7 +101,7 @@ export default function Home() {
     <main className="space-y-6 px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-900">Portfolio</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Portfolio</h1>
           <PortfolioSwitcher
             portfolios={portfolios}
             activeId={activeId}

@@ -14,17 +14,19 @@ export default function AllocationChart({ rows }: { rows: EnrichedHolding[] }) {
   return (
     <div className="rounded-xl bg-white p-5 shadow-sm border border-gray-100">
       <h2 className="mb-3 font-semibold text-gray-900">Allocation</h2>
-      <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
-          <Pie data={data} dataKey="value" nameKey="name" outerRadius={100} label>
-            {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip formatter={(v: number) => `$${v.toFixed(2)}`} />
-          <Legend />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="h-[220px] sm:h-[280px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" outerRadius={80} label>
+              {data.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(v: number) => `$${v.toFixed(2)}`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }
